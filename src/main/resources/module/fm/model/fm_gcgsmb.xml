@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 工厂工时模板表 -->
+<model version="1.0.1" name="fm_gcgsmbb">
+	<fields>
+		<gsmbid type="pk" pk="true" comment="模板ID" label="模板ID"/>
+		<gsmbmc type="string" required="true" maxlength="50" comment="模板名称" label="模板名称"/>
+		<gsmbms type="string" required="false" maxlength="200" comment="模板描述" label="模板描述"/>
+		<sfmrmb type="dict" required="false" comment="是否是默认模版" label="是否是默认模版"/>
+		<zhouyiks type="timestamp" required="false"  comment="周一开始时间" label="周一开始时间"/>
+		<zhouerks type="timestamp" required="false"  comment="周二开始时间" label="周二开始时间"/>
+		<zhousanks type="timestamp" required="false"  comment="周三开始时间" label="周三开始时间"/>
+		<zhousiks type="timestamp" required="false"  comment="周四开始时间" label="周四开始时间"/>
+		<zhouwuks type="timestamp" required="false"  comment="周五开始时间" label="周五开始时间"/>
+		<zhouliuks type="timestamp" required="false"  comment="周六开始时间" label="周六开始时间"/>
+		<zhouriks type="timestamp" required="false"  comment="周日开始时间" label="周日开始时间"/>
+		<zhouyijs type="timestamp" required="false"  comment="周一结束时间" label="周一结束时间"/>
+		<zhouerjs type="timestamp" required="false"  comment="周二结束时间" label="周二结束时间"/>
+		<zhousanjs type="timestamp" required="false"  comment="周三结束时间" label="周三结束时间"/>
+		<zhousijs type="timestamp" required="false"  comment="周四结束时间" label="周四结束时间"/>
+		<zhouwujs type="timestamp" required="false"  comment="周五结束时间" label="周五结束时间"/>
+		<zhouliujs type="timestamp" required="false"  comment="周六结束时间" label="周六结束时间"/>
+		<zhourijs type="timestamp" required="false"  comment="周日结束时间" label="周日结束时间"/>
+	</fields>
+</model>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="workshop-edit" title="UI - 厂区绘制编辑" onReady="ready">
+	<bag name="data">
+		<item name="nodes" type="json" bind="nodes"/>
+		<item name="toolBtns" type="json" bind="toolBtns"/>
+		<item name="data" type="json"	bind="data"/>
+	</bag>
+	<mega name="workshop" height="600" editable="true" onSave="handleOnSave"/>
+	<attribute name="javascript">
+	<![CDATA[	
+		var mega = ui.mega("workshop");
+		function ready() {
+			mega.setNodes(ui.bag("data").get("nodes"));
+			mega.setToolBtns(ui.bag("data").get("toolBtns"));
+			mega.loadData(ui.bag("data").get("data"));
+		}
+		function handleOnSave() {
+			var data = JSON.stringify(this.exportData());
+			console.log(data);
+			ui.post(ui.getRealUrl("/workshop/workshop_save"),{data:data},function() {
+				ui.success("保存成功！");
+			});
+		}
+	]]>
+	</attribute>
+</view>

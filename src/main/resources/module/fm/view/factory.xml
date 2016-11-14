@@ -1,0 +1,848 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="factory" title="UI - 厂区实时监控" onReady="ready">
+	<bag name="data">
+		<item name="nodes" type="json" bind="nodes"/>
+		<item name="toolBtns" type="json" bind="toolBtns"/>
+		<item name="data" type="json" bind="data"/>
+		
+	</bag>
+	<mega name="factory" height="900" editable="false" beforeItemMouseover="handleBeforeItemMouseover" 
+		beforeItemFocus="handleBeforeItemFocus" onItemFocus="handleItemFocus" onItemBlur="handleItemBlur" 
+		contextMenuBuilder="contextMenuBuilder" onItemDbclick="handleItemDbclick">
+		<attribute name="extendArea">
+		<![CDATA[
+			{
+				size:.4,
+				minSize:400,
+				maxSize:'100%',
+				content:'<div id="activities-container" style="width:100%;height:100%;"></div>'
+			}
+				]]>
+		</attribute>
+	</mega>
+	<activities 
+		name="activities" 
+		container="activities-container" 
+		width="100%" height="100%" 
+		size="10" title="工厂动态" 
+		afterload="afterload" 
+		onTypeChange="typeChange" 
+		nodata="没有更多信息了！" 
+		activitycallback="activitycallback">
+			<attribute name="types">
+				<![CDATA[
+					[
+						{
+							label:"全部",
+							value:""
+						},
+						{
+							label:"生产任务",
+							value:"0"
+						},
+						{
+							label:"物料",
+							value:"2"
+						},
+						{
+							label:"设备",
+							value:"1"
+						},
+						{
+							label:"库存",
+							value:"3"
+						},
+						{
+							label:"建模",
+							value:"4"
+						}
+					]
+				
+				]]>
+			</attribute>
+			<attribute name="template">
+				<![CDATA[
+					{
+						//导入生产任务
+						drscrw_tp:['<div class="activity-title" title="{{data.title}}">{{#if url}}<a target="_blank" href="{{url url}}"> {{data.title}}</a> {{else}} {{data.title}} {{/if}}</div>'
+								,'<div class="activity-content clearfix">'
+								,'	<span>'
+								,'		共导入XX条生产任务'
+								,'	</span>'
+								,'</div>'].join(""),
+						
+                        //生产任务分批
+						scrwfp_tp:['<div class="activity-title" title="生产任务{{data.pcmc}}批次已下发"><a target="_blank" href="{{url "/pro/pcfp/index?scrwid="}}{{data.scrwid}}"> 生产任务{{data.pcmc}}批次已下发</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'	<a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'	<div class="activity-table">'
+								,'		<div class="row">'
+								,'			<div class="cell">'
+								,'				<div class="row"><div class="cell activity-item">生产批号：{{data.pcmc}}</div></div>'
+								,'				<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div></div>'
+								,'				<div class="row"><div class="cell activity-item">零件图号：{{data.ljbh}}</div></div>'
+								,'				<div class="row"><div class="cell activity-item">生产任务加工数量：{{data.scrwjgsl}}</div></div>'
+								,'				<div class="row"><div class="cell activity-item">生产任务完成日期：{{formatDate data.scrwjgwcrq "yyyy年MM月dd日"}}</div></div>'
+								,'				<div class="row"><div class="cell activity-item">批次加工数量：{{data.pcsl}}</div></div>'
+								,'				<div class="row"><div class="cell activity-item">批次计划日期：{{formatDate data.pcjhksrq "yyyy年MM月dd日"}} - {{formatDate data.pcjhwcrq "yyyy年MM月dd日"}}</div></div>'
+								,'			</div>'
+								,'			<div class="cell"><div class="activity-chart activity-pie-chart scrwfp_tp" style="width:130px;height:120px;"></div></div>'
+								,'		</div>'
+								,'	</div>'
+								,'	<div class="activity-progress-bar-img">'
+								,'		<div class="clearfix">'
+								,'			<div class="pull-left">加工进度</div>'
+								,'			<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'		</div>'
+								,'		<div class="progress progress-bar-xs">'
+								,'			<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'				<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'		   </div>'
+								,'		</div>'
+								,'	</div>'
+								,'</div>'].join(""),
+						//生产任务终止
+						scrwzz_tp:['<div class="activity-title" title="{{data.scph}}生产任务终止"><a target="_blank" href="{{url "/pro/scrw/query_scrw?_m=planning_customization"}}"> {{data.scph}}生产任务终止</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">生产任务加工数量：{{data.jgsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">零件图号：{{data.ljbh}}</div><div class="cell activity-item">已完成加工数量：{{data.ywcsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 排程发布
+						pcfb_tp:['<div class="activity-title" title="生产任务{{data.pcmc}}已排程"><a target="_blank" href="{{url "/pl/gdyl/gdPreviewIndex?scrwpcid="}}{{data.pcid}}">生产任务{{data.pcmc}}已排程</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'		<a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljUrl}}"><img src="{{data.ljUrl}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">生产批号：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">生产任务加工数量：{{data.scrwjgsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">生产任务完成日期：{{formatDate data.jgwcrq "yyyy年MM月dd日"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">批次计划日期：{{formatDate data.pcjhksrq "yyyy年MM月dd日"}}-{{formatDate data.pcjhwcrq "yyyy年MM月dd日"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工单下发
+						gdxf_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.gdbh}}箱的工艺流程卡已下发"><a target="_blank" href="{{url "/pl/taskbatch/index?_m=task_batch_list"}}">{{data.pcmc}}生产任务{{data.gdbh}}箱的工艺流程卡已下发</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">零件图号：{{data.ljbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">生产批号：{{data.pcmc}}</div><div class="cell activity-item">箱号：{{data.gdbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序组名称：{{data.gxmc}}</div><div class="cell activity-item">加工单元编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 生产调度
+						scdd_tp:['<div class="activity-title" title="{{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单进行调度调整"><a target="_blank" href="{{url "/pl/taskbatch/index?_m=task_batch_list"}}">{{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单进行调度调整</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljUrl}}"><img src="{{data.ljUrl}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">批次名称：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序名称：{{data.gxmc}}</div><div class="cell activity-item">调度类型：{{data.typeDesc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">调度前加工数量：{{data.old_jgsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">调度前加工时间：{{formatDate data.old_jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.old_jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">调度后加工数量：{{data.new_jgsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">调度后加工时间：{{formatDate data.new_jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.new_jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工单打印
+						gddy_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.gdbh}}箱的工艺流程卡已打印"><a target="_blank" href="{{url "/pl/gdpldy/showGdlist?_m=batch_print_list"}}">{{data.pcmc}}生产任务{{data.gdbh}}箱的工艺流程卡已打印</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">零件图号：{{data.ljbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序组名称：{{data.gxmc}}</div><div class="cell activity-item">加工单元编号：{{data.sbbh}} </div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 手动报工
+						sdbg_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.gdbh}}箱工艺流程卡手动报工">{{data.pcmc}}生产任务{{data.gdbh}}箱工艺流程卡手动报工</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">生产批号：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序组名称：{{data.gxmc}}</div><div class="cell activity-item">加工单元编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工艺流程卡加工数量：{{data.jgsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">合格数量：{{data.bcbgsl}}</div><div class="cell activity-item">报废数量：{{data.bcbfsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工废数量：{{data.bfgf}}</div><div class="cell activity-item">料废数量：{{data.bflf}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'      <div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'   </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 自动报工
+						zdbg_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.xh}}箱工艺流程卡来自设备{{data.sbbh}}的自动报工">{{data.pcmc}}生产任务{{data.xh}}箱工艺流程卡来自设备{{data.sbbh}}的自动报工</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="零件名称(图号)" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">生产批号：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序名称：{{data.gxzmc}}</div><div class="cell activity-item">设备编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj	 "MM月dd日 hh时mm分"}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">报工数量：{{data.ncbgsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+								
+						// 零件报废
+						ljbf_tp:['<div class="activity-title" title="{{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单作废零件"> {{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单作废零件</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">批次编号：{{data.pcbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序名称：{{data.gxmc}}</div><div class="cell activity-item">设备编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div><div class="cell activity-item">报废数量：{{data.bcbfsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table"><div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div></div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 报开工
+						bkg_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.gdbh}}箱已开工">{{data.pcmc}}生产任务{{data.gdbh}}箱已开工</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">生产批号：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序组名称：{{data.gxmc}}</div><div class="cell activity-item">设备编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div><div class="cell activity-item">开工时间：{{formatDate data.kgsj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 报完工
+						bwg_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.gdbh}}箱报完工">{{#if url}}<a target="_blank" href="{{url url}}"> {{data.pcmc}}生产任务{{data.gdbh}}箱报完工</a> {{else}} {{data.pcmc}}生产任务{{data.gdbh}}箱报完工{{/if}}</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序名称：{{data.gxmc}}</div><div class="cell activity-item">设备编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div><div class="cell activity-item">完工数量：{{data.bcwcsl}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'      <div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 物料送达
+						wlsd_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.gdbh}}箱物料已送达">{{data.pcmc}}生产任务{{data.gdbh}}箱物料已送达</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">批次名称：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序组名称：{{data.gxmc}}</div><div class="cell activity-item">加工单元编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">物料编号：{{data.wlbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">送达数量：{{data.sdsl}}</div><div class="cell activity-item">送达日期：{{formatDate data.sdsj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 物料接收
+						wljs_tp:['<div class="activity-title" title="{{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单物料已接收">{{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单物料已接收</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">批次名称：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序名称：{{data.gxmc}}</div><div class="cell activity-item">设备编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">物料编号：{{data.wlbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">送达数量：{{data.sdsl}}</div><div class="cell activity-item">送达日期：{{formatDate data.zhsdsj "MM月dd日 hh时mm分"}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">接收数量：{{data.jssl}}</div><div class="cell activity-item">接收日期：{{formatDate data.jssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工装送达
+						gzsd_tp:['<div class="activity-title" title="{{data.gzmc}}工装已送达{{data.sbwz}}位置"> {{data.gzmc}}工装已送达{{data.sbwz}}位置 </div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">工装编号：{{data.gztm}}</div><div class="cell activity-item">工装名称：{{data.gzmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工装类型：{{data.wllb}}</div><div class="cell activity-item">工装规格：{{data.gzgg}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">送达时间：{{formatDate data.sdsj "MM月dd日 hh时mm分"}}</div><div class="cell activity-item">送达位置：{{data.sdwz}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工装接收
+						gzjs_tp:['<div class="activity-title" title="{{data.gzmc}}工装已接收">{{data.gzmc}}工装已接收</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">工装编号：{{data.gztm}}</div><div class="cell activity-item">工装名称：{{data.gzmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工装类型：{{data.wllb}}</div><div class="cell activity-item">工装规格：{{data.gzgg}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">送达时间：{{formatDate data.zhsj "MM月dd日 hh时mm分"}}</div><div class="cell activity-item">送达位置：{{data.sdwz}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">接收时间：{{formatDate data.jssj "MM月dd日 hh时mm分"}}</div><div class="cell activity-item">接收位置：{{data.sdwz}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 缺料报警
+						qlbj_tp:['<div class="activity-title" title="{{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单缺料告警">{{data.scrwbh}}生产任务{{data.pcmc}}批次{{data.gdbh}}工单缺料告警</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">设备编号：{{data.sbbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工单加工数量：{{data.jgsl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">物料编号：{{data.wlbh}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">计划加工时间：{{formatDate data.jhkssj "MM月dd日 hh时mm分"}} - {{formatDate data.jhjssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'  <div class="activity-progress-bar-img">'
+								,'	<div class="clearfix">'
+								,'		<div class="pull-left">加工进度</div>'
+								,'		<div class="pull-right">{{data.scrwjd}}%</div>'
+								,'	</div>'
+								,'	<div class="progress progress-bar-xs">'
+								,'		<div style="width: {{data.scrwjd}}%;" class="progress-bar progress-bar-success" aria-valuenow="{{data.scrwjd}}" aria-valuemin="0" aria-valuemax="100">'
+								,'			<span class="sr-only">{{data.scrwjd}}% Complete</span>'
+								,'	   </div>'
+								,'	</div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工装报警
+						gzbj_tp:['<div class="activity-title" title="{{data.sbmc}}设备缺少{{data.gzlx}}">{{data.sbmc}}设备缺少{{data.gzlx}}</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">工装类型：{{data.gzlx}}</div><div class="cell activity-item">设备编号：{{data.sbbh}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 设备故障
+						sbgz_tp:['<div class="activity-title" title="{{data.sbbh}}设备故障告警">{{data.sbbh}}设备故障告警</div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.sbmc}}({{data.sbbh}})" href="{{data.sbtp}}"><img src="{{data.sbtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">设备编号：{{data.sbbh}}</div><div class="cell activity-item">设备名称：{{data.sbmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">故障发生时间：{{formatDate data.fssj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 设备状态
+						sbzt_tp:['<div class="activity-title" title="{{data.sbmc}}设备当前状态{{data.sbzt}}"><a target="_blank" href="{{url "/mon/ssjk/query_ssjk?sbbh="}}{{data.sbbh}}"> {{data.sbmc}}设备当前状态{{data.sbzt}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.sbmc}}({{data.sbbh}})" href="{{data.sbtp}}"><img src="{{data.sbtp}}"  class="activity-img" onerror="var defaultImg=\'data:image/png;base64,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0p8zAAA/cWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4KPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS41LWMwMTQgNzkuMTUxNDgxLCAyMDEzLzAzLzEzLTEyOjA5OjE1ICAgICAgICAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIKICAgICAgICAgICAgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iCiAgICAgICAgICAgIHhtbG5zOnN0RXZ0PSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VFdmVudCMiCiAgICAgICAgICAgIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIgogICAgICAgICAgICB4bWxuczpwaG90b3Nob3A9Imh0dHA6Ly9ucy5hZG9iZS5jb20vcGhvdG9zaG9wLzEuMC8iCiAgICAgICAgICAgIHhtbG5zOnRpZmY9Imh0dHA6Ly9ucy5hZG9iZS5jb20vdGlmZi8xLjAvIgogICAgICAgICAgICB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyI+CiAgICAgICAgIDx4bXA6Q3JlYXRvclRvb2w+QWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKTwveG1wOkNyZWF0b3JUb29sPgogICAgICAgICA8eG1wOkNyZWF0ZURhdGU+MjAxNi0wOC0zMFQyMDoxMDozOCswODowMDwveG1wOkNyZWF0ZURhdGU+CiAgICAgICAgIDx4bXA6TWV0YWRhdGFEYXRlPjIwMTYtMDgtMzBUMjA6MTU6NTcrMDg6MDA8L3htcDpNZXRhZGF0YURhdGU+CiAgICAgICAgIDx4bXA6TW9kaWZ5RGF0ZT4yMDE2LTA4LTMwVDIwOjE1OjU3KzA4OjAwPC94bXA6TW9kaWZ5RGF0ZT4KICAgICAgICAgPGRjOmZvcm1hdD5pbWFnZS9wbmc8L2RjOmZvcm1hdD4KICAgICAgICAgPHhtcE1NOkluc3RhbmNlSUQ+eG1wLmlpZDpjOWE3MzBhMi05ZGU1LTlhNGMtOWM4NS1lODM4ZTczMjZmNGY8L3htcE1NOkluc3RhbmNlSUQ+CiAgICAgICAgIDx4bXBNTTpEb2N1bWVudElEPnhtcC5kaWQ6Yjg0ZTlhMjMtM2Y5Ni02MzQ4LWIzYzItMmI0ZjI5MTAxNWY5PC94bXBNTTpEb2N1bWVudElEPgogICAgICAgICA8eG1wTU06T3JpZ2luYWxEb2N1bWVudElEPnhtcC5kaWQ6Yjg0ZTlhMjMtM2Y5Ni02MzQ4LWIzYzItMmI0ZjI5MTAxNWY5PC94bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ+CiAgICAgICAgIDx4bXBNTTpIaXN0b3J5PgogICAgICAgICAgICA8cmRmOlNlcT4KICAgICAgICAgICAgICAgPHJkZjpsaSByZGY6cGFyc2VUeXBlPSJSZXNvdXJjZSI+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDphY3Rpb24+Y3JlYXRlZDwvc3RFdnQ6YWN0aW9uPgogICAgICAgICAgICAgICAgICA8c3RFdnQ6aW5zdGFuY2VJRD54bXAuaWlkOmI4NGU5YTIzLTNmOTYtNjM0OC1iM2MyLTJiNGYyOTEwMTVmOTwvc3RFdnQ6aW5zdGFuY2VJRD4KICAgICAgICAgICAgICAgICAgPHN0RXZ0OndoZW4+MjAxNi0wOC0zMFQyMDoxMDozOCswODowMDwvc3RFdnQ6d2hlbj4KICAgICAgICAgICAgICAgICAgPHN0RXZ0OnNvZnR3YXJlQWdlbnQ+QWRvYmUgUGhvdG9zaG9wIENDIChXaW5kb3dzKTwvc3RFdnQ6c29mdHdhcmVBZ2VudD4KICAgICAgICAgICAgICAgPC9yZGY6bGk+CiAgICAgICAgICAgICAgIDxyZGY6bGkgcmRmOnBhcnNlVHlwZT0iUmVzb3VyY2UiPgogICAgICAgICAgICAgICAgICA8c3RFdnQ6YWN0aW9uPnNhdmVkPC9zdEV2dDphY3Rpb24+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDppbnN0YW5jZUlEPnhtcC5paWQ6MDE1OTg3MTQtNmMxNy00MTQzLWE3M2ItN2Q5MjE4OTc1ZWI1PC9zdEV2dDppbnN0YW5jZUlEPgogICAgICAgICAgICAgICAgICA8c3RFdnQ6d2hlbj4yMDE2LTA4LTMwVDIwOjE1OjU3KzA4OjAwPC9zdEV2dDp3aGVuPgogICAgICAgICAgICAgICAgICA8c3RFdnQ6c29mdHdhcmVBZ2VudD5BZG9iZSBQaG90b3Nob3AgQ0MgKFdpbmRvd3MpPC9zdEV2dDpzb2Z0d2FyZUFnZW50PgogICAgICAgICAgICAgICAgICA8c3RFdnQ6Y2hhbmdlZD4vPC9zdEV2dDpjaGFuZ2VkPgogICAgICAgICAgICAgICA8L3JkZjpsaT4KICAgICAgICAgICAgICAgPHJkZjpsaSByZGY6cGFyc2VUeXBlPSJSZXNvdXJjZSI+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDphY3Rpb24+Y29udmVydGVkPC9zdEV2dDphY3Rpb24+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDpwYXJhbWV0ZXJzPmZyb20gYXBwbGljYXRpb24vdm5kLmFkb2JlLnBob3Rvc2hvcCB0byBpbWFnZS9wbmc8L3N0RXZ0OnBhcmFtZXRlcnM+CiAgICAgICAgICAgICAgIDwvcmRmOmxpPgogICAgICAgICAgICAgICA8cmRmOmxpIHJkZjpwYXJzZVR5cGU9IlJlc291cmNlIj4KICAgICAgICAgICAgICAgICAgPHN0RXZ0OmFjdGlvbj5kZXJpdmVkPC9zdEV2dDphY3Rpb24+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDpwYXJhbWV0ZXJzPmNvbnZlcnRlZCBmcm9tIGFwcGxpY2F0aW9uL3ZuZC5hZG9iZS5waG90b3Nob3AgdG8gaW1hZ2UvcG5nPC9zdEV2dDpwYXJhbWV0ZXJzPgogICAgICAgICAgICAgICA8L3JkZjpsaT4KICAgICAgICAgICAgICAgPHJkZjpsaSByZGY6cGFyc2VUeXBlPSJSZXNvdXJjZSI+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDphY3Rpb24+c2F2ZWQ8L3N0RXZ0OmFjdGlvbj4KICAgICAgICAgICAgICAgICAgPHN0RXZ0Omluc3RhbmNlSUQ+eG1wLmlpZDpjOWE3MzBhMi05ZGU1LTlhNGMtOWM4NS1lODM4ZTczMjZmNGY8L3N0RXZ0Omluc3RhbmNlSUQ+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDp3aGVuPjIwMTYtMDgtMzBUMjA6MTU6NTcrMDg6MDA8L3N0RXZ0OndoZW4+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDpzb2Z0d2FyZUFnZW50PkFkb2JlIFBob3Rvc2hvcCBDQyAoV2luZG93cyk8L3N0RXZ0OnNvZnR3YXJlQWdlbnQ+CiAgICAgICAgICAgICAgICAgIDxzdEV2dDpjaGFuZ2VkPi88L3N0RXZ0OmNoYW5nZWQ+CiAgICAgICAgICAgICAgIDwvcmRmOmxpPgogICAgICAgICAgICA8L3JkZjpTZXE+CiAgICAgICAgIDwveG1wTU06SGlzdG9yeT4KICAgICAgICAgPHhtcE1NOkRlcml2ZWRGcm9tIHJkZjpwYXJzZVR5cGU9IlJlc291cmNlIj4KICAgICAgICAgICAgPHN0UmVmOmluc3RhbmNlSUQ+eG1wLmlpZDowMTU5ODcxNC02YzE3LTQxNDMtYTczYi03ZDkyMTg5NzVlYjU8L3N0UmVmOmluc3RhbmNlSUQ+CiAgICAgICAgICAgIDxzdFJlZjpkb2N1bWVudElEPnhtcC5kaWQ6Yjg0ZTlhMjMtM2Y5Ni02MzQ4LWIzYzItMmI0ZjI5MTAxNWY5PC9zdFJlZjpkb2N1bWVudElEPgogICAgICAgICAgICA8c3RSZWY6b3JpZ2luYWxEb2N1bWVudElEPnhtcC5kaWQ6Yjg0ZTlhMjMtM2Y5Ni02MzQ4LWIzYzItMmI0ZjI5MTAxNWY5PC9zdFJlZjpvcmlnaW5hbERvY3VtZW50SUQ+CiAgICAgICAgIDwveG1wTU06RGVyaXZlZEZyb20+CiAgICAgICAgIDxwaG90b3Nob3A6Q29sb3JNb2RlPjM8L3Bob3Rvc2hvcDpDb2xvck1vZGU+CiAgICAgICAgIDxwaG90b3Nob3A6SUNDUHJvZmlsZT5zUkdCIElFQzYxOTY2LTIuMTwvcGhvdG9zaG9wOklDQ1Byb2ZpbGU+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDx0aWZmOlhSZXNvbHV0aW9uPjcyMDAwMC8xMDAwMDwvdGlmZjpYUmVzb2x1dGlvbj4KICAgICAgICAgPHRpZmY6WVJlc29sdXRpb24+NzIwMDAwLzEwMDAwPC90aWZmOllSZXNvbHV0aW9uPgogICAgICAgICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogICAgICAgICA8ZXhpZjpDb2xvclNwYWNlPjE8L2V4aWY6Q29sb3JTcGFjZT4KICAgICAgICAgPGV4aWY6UGl4ZWxYRGltZW5zaW9uPjEyMDwvZXhpZjpQaXhlbFhEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOlBpeGVsWURpbWVuc2lvbj4xMjA8L2V4aWY6UGl4ZWxZRGltZW5zaW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg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\';this.src=defaultImg;this.parentNode.href=defaultImg;"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">设备编号：{{data.sbbh}}</div><div class="cell activity-item">设备名称：{{data.sbmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">当前状态：{{data.sbzt}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 零件入库
+						ljrk_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.ljmc}}零件入库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/ljkcglrk/query_ljxx?_m=lj_inventory_management_in_menu"}}">{{data.pcmc}}生产任务{{data.ljmc}}零件入库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">批次名称：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">入库数量：{{data.sl}}</div><div class="cell activity-item">部门：{{data.zzjgmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">库房：{{data.kfmc}}</div><div class="cell activity-item">库位：{{data.kwmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">入库时间：{{formatDate data.rksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 零件出库
+						ljck_tp:['<div class="activity-title" title="{{data.pcmc}}生产任务{{data.ljmc}}零件出库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/ljkcgl/query_ljkcgl?_m=lj_inventory_management_out_menu"}}"> {{data.pcmc}}生产任务{{data.ljmc}}零件出库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件名称：{{data.ljmc}}</div><div class="cell activity-item">生产批号：{{data.pcmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">出库数量：{{data.sl}}</div><div class="cell activity-item">部门：{{data.zzjgmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">出库时间：{{formatDate data.cksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">客户单号：{{data.khdh}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 物料出库
+						wlck_tp:['<div class="activity-title" title="{{data.wlmc}}物料出库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/kcgl/query_kcgl?_m=wl_inventory_management_menu"}}"> {{data.wlmc}}物料出库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">物料编号：{{data.wlid}}</div><div class="cell activity-item">物料名称：{{data.wlmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">物料批次：{{data.pcid}}</div><div class="cell activity-item">出库数量：{{data.sl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">领用部门：{{data.zzjgmc}}</div><div class="cell activity-item">出库时间：{{formatDate data.cksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工装出库
+						gzck_tp:['<div class="activity-title" title="{{data.wlmc}}工装出库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/gzkcgl/query_gzkcgl?_m=gz_inventory_management_in_menu"}}"> {{data.wlmc}}工装出库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">工装编号：{{data.wlid}}</div><div class="cell activity-item">工装名称：{{data.wlmc}}</div></div>'
+								,'		<div class="row"><!--<div class="cell activity-item">工装批次：{{data.pcid}}</div>--><div class="cell activity-item">出库数量：{{data.sl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">领用部门：{{data.zzjgmc}}</div><div class="cell activity-item">出库时间：{{formatDate data.cksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 刀具出库
+						djck_tp:['<div class="activity-title" title="{{data.wlmc}}刀具出库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/djkcgl/query_djkcgl?_m=dj_inventory_management_in_menu"}}"> {{data.wlmc}}刀具出库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">刀具类型编号：{{data.wlid}}</div><div class="cell activity-item">刀具名称：{{data.wlmc}}</div></div>'
+								,'		<div class="row"><!--<div class="cell activity-item">刀具批次：{{data.pcid}}</div>--><div class="cell activity-item">出库数量：{{data.sl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">领用部门：{{data.zzjgmc}}</div><div class="cell activity-item">出库时间：{{formatDate data.cksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 物料入库
+						wlrk_tp:['<div class="activity-title" title="{{data.wlmc}}物料入库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/kcgl/query_kcgl?_m=wl_inventory_management_menu"}}"> {{data.wlmc}}物料入库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">物料编号：{{data.wlid}}</div><div class="cell activity-item">物料名称：{{data.wlmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">物料批次：{{data.pcid}}</div><div class="cell activity-item">入库数量：{{data.sl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">部门：{{data.zzjgmc}}</div><div class="cell activity-item">库房：{{data.kfmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">库位：{{data.kwmc}}</div><div class="cell activity-item">入库时间：{{formatDate data.rksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工装入库
+						gzrk_tp:['<div class="activity-title" title="{{data.wlmc}}工装入库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/gzkcgl/query_gzkcgl?_m=gz_inventory_management_in_menu"}}"> {{data.wlmc}}工装入库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">工装编号：{{data.wlid}}</div><div class="cell activity-item">工装名称：{{data.wlmc}}</div></div>'
+								,'		<div class="row"><!--<div class="cell activity-item">工装批次：{{data.pcid}}</div>--><div class="cell activity-item">入库数量：{{data.sl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">部门：{{data.zzjgmc}}</div><div class="cell activity-item">库房：{{data.kfmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">库位：{{data.kwmc}}</div><div class="cell activity-item">入库时间：{{formatDate data.rksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 刀具入库
+						djrk_tp:['<div class="activity-title" title="{{data.wlmc}}刀具入库数量{{data.sl}}{{data.dw}}"><a target="_blank" href="{{url "/wm/djkcgl/query_djkcgl?_m=dj_inventory_management_in_menu"}}"> {{data.wlmc}}刀具入库数量{{data.sl}}{{data.dw}}</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">刀具类型编号：{{data.wlid}}</div><div class="cell activity-item">刀具名称：{{data.wlmc}}</div></div>'
+								,'		<div class="row"><!--<div class="cell activity-item">刀具批次：{{data.pcid}}</div>--><div class="cell activity-item">出库数量：{{data.sl}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">领用部门：{{data.zzjgmc}}</div><div class="cell activity-item">出库时间：{{formatDate data.cksj "MM月dd日 hh时mm分"}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 工艺发布
+						gyfb_tp:['<div class="activity-title" title="{{data.ljmc}}零件工艺发布"><a target="_blank" href="{{url "/pm/gy/gyjmIndex?ljid="}}{{data.ljid}}&gyid={{data.gyid}}"> {{data.ljmc}}零件工艺发布</a></div>'
+								,'<div class="activity-content clearfix">'
+								,'	<a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">零件图号：{{data.ljbh}}</div><div class="cell activity-item">零件名称：{{data.ljmc}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">工序数量：{{data.gxsl}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 程序上传
+						cxsc_tp:['<div class="activity-title" title="{{data.ljmc}}零件{{data.gxmc}}工序程序上传">{{data.ljmc}}零件{{data.gxmc}}工序程序上传</div>'
+								,'<div class="activity-content clearfix">'
+								,'	<a target="_blank" class="activity-img-link" title="{{data.ljmc}}({{data.ljbh}})" href="{{data.ljtp}}"><img src="{{data.ljtp}}"  class="activity-img"></a>'
+								,'  <div class="activity-table">'
+								,'		<div class="row"><div class="cell activity-item">程序名称：{{data.cxmc}}</div><div class="cell activity-item">程序类别：{{data.cxlb}}</div></div>'
+								,'		<div class="row"><div class="cell activity-item">程序类型：{{data.cxlx}}</div><div class="cell activity-item">所属工序：{{data.gxmc}}</div></div>'
+								,'  </div>'
+								,'</div>'].join(""),
+						// 图表 测试demo
+						//生产任务分批
+						chartdemo_tp:['<div class="activity-title" title="{{data.title}}">{{#if url}}<a target="_blank" href="{{url url}}"> {{data.title}}</a> {{else}} {{data.title}} {{/if}}</div>'
+								,'<div class="activity-content clearfix">'
+								,' <div class="activity-table">'
+								,' <div class="row">'
+								,'  <div class="cell">'
+								,'		<div class="row"><div class="cell activity-item">批次名称：xxxxx</div></div>'
+								,'		<div class="row"><div class="cell activity-item">批次数量：xxxxx</div></div>'
+								,'		<div class="row"><div class="cell activity-item">完成日期：{{formatDate 1472175917611 "yyyy-MM-dd hh:mm:ss"}}</div></div>'
+								,'  </div>'
+								,'  <div class="cell">'
+								,'    <div class="activity-chart activity-pie-chart" style="width:200px;height:70px;"></div>'
+								,'  </div>'
+								,'  <div class="cell">'
+								,'    <div class="activity-chart activity-bar-chart" style="width:250px;height:70px;"></div>'
+								,'  </div>'
+								,' </div>'
+								,' </div>'
+								,'</div>'].join(""),
+					}
+				]]>
+			</attribute>	
+		</activities>
+	<modal name="popModal" heading="新窗口" mode="iframe" sizing="large" show="false" height="600">
+		<modal-body>
+			
+		</modal-body>
+	</modal>
+	<attribute name="javascript">
+	<![CDATA[
+		function afterload(data){
+			//ui.info("after load",JSON.stringify(data));
+			return data;
+		}
+		function typeChange(t){
+			type = t;
+			//ui.info("type change","type=" + type);
+		}
+		function activitycallback(activity){
+			if(activity.template_id !== "scrwfp_tp"){
+				return;
+			}
+			var $chart = $(this).find(".activity-chart");
+			if($chart.length===0){
+				return;
+			}
+			var pieData = $.parseJSON(activity.data.pcxx || "[]");
+			var legendData = [activity.data.pcmc];
+			var pieChart = echarts.init($chart.get(0));
+			var pieChartOption = {
+				    tooltip : {
+				        trigger: 'item',
+				        formatter: "{a} <br/>{b} : {c} ({d}%)",
+				        textStyle:{
+				            fontSize:11
+				        }
+				    },
+				    legend: {
+				        orient: 'horizontal',
+				        textStyle:{
+				            fontSize:11
+				        },
+				        formatter:"当前批次",
+				        left:"center",
+				        //itemWidth:10,
+				        itemHeight:10,
+				        data: legendData
+				    },
+				    series : [
+				        {
+				            name: '生产任务分批',
+				            type: 'pie',
+				            radius : '45',
+				            center: ['50%', '70'],
+				            hoverAnimation:false,
+				             label:{
+				                normal:{
+				                	show:false,
+				                    textStyle:{
+				                        fontSize:11
+				                    }
+				                }
+				            },
+				            labelLine:{
+				            	normal:{
+				            		length:2,
+				            		length2:2
+				            	}
+				            },
+				            data:pieData,
+				            itemStyle: {
+				                emphasis: {
+				                    shadowBlur: 5,
+				                    shadowOffsetX: 0,
+				                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+				                }
+				            }
+				        }
+				    ]
+				};
+				pieChart.setOption(pieChartOption);
+		}
+		var lastTime,type="",size=10,obtainTimer;
+		function obtain(){
+			var params = {};
+			if(lastTime) {
+				params.after = lastTime;
+			}
+			params.type=type;
+			params.size=size;
+			ui.post(ui.getUrl("/activity/service/list"),params,function(data) {
+				if(data.length) {
+					ui.activities("activities").prependData(data);
+					for(var i=0;i<data.length;i++) {
+						handleData(data[i]);
+					}
+					lastTime = data[0].ctime;
+				}
+				obtainTimer = setTimeout(obtain,1000);
+			},function(){
+				obtainTimer = setTimeout(obtain,3000);
+			});
+		}
+		function handleData(data) {
+		}
+		function startObtain() {			
+			obtain();
+		}
+		function stopObtain() {
+			clearInterval(obtainTimer);
+			obtainTimer = null;
+		}
+		var mega = ui.mega("factory");
+		function ready() {
+			ui.activities("activities").setUrl(ui.getUrl("/activity/service/list"));
+			mega.setNodes(ui.bag("data").get("nodes"));
+			mega.setToolBtns(ui.bag("data").get("toolBtns"));
+			mega.loadData(ui.bag("data").get("data"));
+			startObtain();
+		}
+		
+		function handleBeforeItemMouseover(id) {
+			//if(this.getNodeType(id) != 'department' && this.getNodeType(id) != 'building' && this.getNodeType(id) != 'singlebuilding') {
+			//	return false;
+			//} else {
+			//	return true;
+			//}
+		}
+		function handleBeforeItemFocus(id) {
+			//if(this.getNodeType(id) != 'department' && this.getNodeType(id) != 'building' && this.getNodeType(id) != 'singlebuilding') {
+			//	return false;
+			//} else {
+			//	return true;
+			//}
+		}
+		var popoverState={};
+		function contextMenuBuilder(id,type) {
+			var result;
+			if(id && (this.getNodeType(id) == "department")) {
+				var items = {
+							"show-scrw": {name: "生产任务",disabled:false},
+		                    "show-jhpc": {name: "计划排产",disabled:false},
+		                    "show-jdgz": {name: "进度跟踪",disabled:false},
+		                    "show-wlps": {name: "物料配送",disabled:false},
+		                    "show-sscx": {name: "实时查询",disabled:false},
+		                    "show-sbtz": {name: "设备台帐",disabled:false}
+		                };
+				result = {
+					items:items,
+					callback:function(key) {
+						var _id = id;
+						right_department(key);
+					}
+				};
+			} 
+			if(id && (this.getNodeType(id) == "building")) {
+				var items = {
+							//"show-erp": {name: "加工任务指派到车间(ERP)",disabled:false},
+		                    "show-ljgl": {name: "零件管理",disabled:false},
+		                    "show-gygl": {name: "工艺管理",disabled:false},
+		                    "show-cxgl": {name: "程序管理",disabled:false},
+		                    "show-gcrl": {name: "工厂日历",disabled:false},
+		                    "show-rywh": {name: "人员维护",disabled:false},
+		                    "show-zzjg": {name: "组织机构",disabled:false}
+		                };
+				result = {
+					items:items,
+					callback:function(key) {
+						var _id = id;
+						right_building(key);
+					}
+				};
+			} 
+			return result;			 
+		}
+		function handleItemDbclick(id,type) {
+			if(this.getNodeType(id) == 'department') {
+				//var url = this.getAttribute(id,"url");
+				var url = ui.getUrl("/fm/workshop/index");
+				window.open(url);
+			}
+		}
+		function handleItemFocus(id,type) {
+			//ui.info("focus : "+id+","+type);
+		}
+		function handleItemBlur(id,type) {
+			//ui.info("blur : "+id+","+type);
+		}
+		
+		function right_department(key){
+			switch(key) {
+				case "show-scrw" :
+					var url = ui.getUrl("/pro/scrw/query_scrw");
+					window.open(url);
+					break;
+				case "show-jhpc" :
+					var url = ui.getUrl("/pl/taskbatch/index");
+					window.open(url);
+					break;
+				
+				case "show-jdgz" :
+					var url = ui.getUrl("/que/jdgz/query_jdgz");
+					window.open(url);
+					break;
+				
+				case "show-wlps" :
+					var url = ui.getUrl("/mf/wlps/query_wlps");
+					window.open(url);
+					break;
+				
+				case "show-sscx" :
+					var url = ui.getUrl("/que/scxxsscx/scxxsscxIndex");
+					window.open(url);
+					break;
+				
+				case "show-sbtz" : 
+					var url = ui.getUrl("/em/sbtz/query_sbtz");
+					window.open(url);
+					break;
+					
+				default:ui.info("click context menu : "+key);
+			}
+		}
+		
+		function right_building(key){
+			switch(key) {
+				case "show-erp" :
+					//var url = "/ismes-web/pro/scrw/query_scrw";
+					//window.open(url);
+					ui.alert("ERP");
+					break;
+				case "show-ljgl" :
+					var url = ui.getUrl("/pm/ljgl/index");
+					window.open(url);
+					break;
+				
+				case "show-cxgl" :
+					var url = ui.getUrl("/pm/cxgl/query_cxgl");
+					window.open(url);
+					break;
+				
+				case "show-gcrl" :
+					var url = ui.getUrl("/fm/gcrl/gcrlmbIndex");
+					window.open(url);
+					break;
+				
+				case "show-rywh" :
+					var url = ui.getUrl("/user/manage/listUser");
+					window.open(url);
+					break;
+				
+				case "show-zzjg" : 
+					var url = ui.getUrl("/org/zzjg/index");
+					window.open(url);
+					break;
+					
+				case "show-gygl" : 
+					var url = ui.getUrl("/pm/gy/partsIndex");
+					window.open(url);
+					break;
+					
+				default:ui.info("click context menu : "+key);
+			}
+		}
+	]]>
+	</attribute>
+</view>

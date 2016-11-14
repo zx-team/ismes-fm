@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module name="fm" version="1.0.0" category="system">
+	<information>
+		<name>Factory Management</name>
+		<vendor>
+			<name>Isesol isMES</name>
+			<url>http://www.isesol.com/</url>
+		</vendor>
+		<description>Factory Management.</description>
+		<license>AGPL</license>
+	</information>
+	<activities>
+		<activity name="service" dialect="java" class="com.isesol.mes.ismes.fm.service.FactoryManagementService"/>
+		<!-- 工厂日历 -->
+		<activity name="gcrl" dialect="java" roles="SYSTEM_MANAGEMENT_ROLE" class="com.isesol.mes.ismes.fm.activity.GcrlActivity"/>
+		<!-- 工时维护 -->
+		<activity name="gswh" dialect="java" roles="SYSTEM_MANAGEMENT_ROLE" class="com.isesol.mes.ismes.fm.activity.GsActivity"/>
+		<!-- 工厂布局 -->
+		<activity name="factory" dialect="java" roles="SYSTEM_MANAGEMENT_ROLE" class="com.isesol.mes.ismes.fm.activity.FactoryActivity"/>
+		<!-- 车间布局 -->
+		<activity name="workshop" dialect="java" roles="SYSTEM_MANAGEMENT_ROLE" class="com.isesol.mes.ismes.fm.activity.WorkshopActivity"/>
+		<!-- 设备布局 -->
+		<activity name="sbxx" dialect="java" roles="SYSTEM_MANAGEMENT_ROLE" class="com.isesol.mes.ismes.fm.activity.SbxxActivity"/>
+	</activities>
+	<roles>
+		<role name="SYSTEM_MANAGEMENT_ROLE" label="系统管理人员_工厂建模" description="系统基础信息设置" />
+	</roles>
+	<menus>
+		<!-- 工厂建模（一级） -->
+		<category name="factory_modeling" label="工厂建模" icon="#00cc92;Factory_modeling"  weight="2"/>
+		<!-- 工厂日历 （二级）-->
+		<category name="factory_calendar" label="工厂日历" icon="button " category = "factory_modeling" weight="50"/>
+		<menu name="calendar_setting" label="日历设置" activity="gcrl" activity-method="gcrlmbIndex" 
+ 			 category="factory_calendar" roles="SYSTEM_MANAGEMENT_ROLE" description="日历设置" icon="button" weight="100"/>
+ 		<menu name="tasktime_setting" label="工时设置" activity="gswh" activity-method="gswhIndex" 
+ 			 category="factory_calendar" roles="SYSTEM_MANAGEMENT_ROLE" description="工时设置" icon="button" weight="200"/>
+		<!-- 布局建模（二级） -->
+		<category name="layout_model" label="布局建模" icon="button " category = "factory_modeling" weight="10"/>
+		<menu name="gcbj" label="工厂布局" activity="factory" activity-method="editIndex" 
+ 			 category="layout_model" roles="SYSTEM_MANAGEMENT_ROLE" description="工厂布局" icon="button" weight="100"/>
+ 		<menu name="cjbj" label="车间布局" activity="workshop" activity-method="editIndex" 
+ 			 category="layout_model" roles="SYSTEM_MANAGEMENT_ROLE" description="车间布局" icon="button" weight="200"/>
+ 		<menu name="sbbj" label="设备布局" activity="sbxx" activity-method="department" 
+ 			category="layout_model" roles="SYSTEM_MANAGEMENT_ROLE" description="设备布局" icon="button" weight="300"/>
+	</menus>
+	<services>
+		<service name = "fmService_query_gcgsmbb" activity = "service" activity-method = "query_gcgsmbb"/>
+		<service name = "fmService_getGcCalendarDays" activity = "service" activity-method = "getGcCalendarDays"/>
+		<service name = "fmService_sbtb" activity = "service" activity-method = "query_sbtb"/>
+	</services>
+	<resources>
+		<resource name="i5-front-left-yellow" fileName="i5-front-left-yellow.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-left-yellow.png"/>
+		<resource name="i5-front-left-white" fileName="i5-front-left-white.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-left-white.png"/>
+		<resource name="i5-front-left-green" fileName="i5-front-left-green.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-left-green.png"/>		
+		<resource name="i5-front-left-red" fileName="i5-front-left-red.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-left-red.png"/>
+		<resource name="i5-front-right-yellow" fileName="i5-front-right-yellow.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-right-yellow.png"/>				
+		<resource name="i5-front-right-white" fileName="i5-front-right-white.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-right-white.png"/>		
+		<resource name="i5-front-right-green" fileName="i5-front-right-green.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-right-green.png"/>		
+		<resource name="i5-front-right-red" fileName="i5-front-right-red.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-front-right-red.png"/>	
+		<resource name="i5-back-left-yellow" fileName="i5-back-left-yellow.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-left-yellow.png"/>	
+		<resource name="i5-back-left-white" fileName="i5-back-left-white.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-left-white.png"/>
+		<resource name="i5-back-left-green" fileName="i5-back-left-green.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-left-green.png"/>
+		<resource name="i5-back-left-red" fileName="i5-back-left-red.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-left-red.png"/>
+		<resource name="i5-back-right-yellow" fileName="i5-back-right-yellow.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-right-yellow.png"/>
+		<resource name="i5-back-right-white" fileName="i5-back-right-white.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-right-white.png"/>
+		<resource name="i5-back-right-green" fileName="i5-back-right-green.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-right-green.png"/>
+		<resource name="i5-back-right-red" fileName="i5-back-right-red.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/i5-back-right-red.png"/>	
+		<resource name="belt-front-left" fileName="belt-front-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/belt-front-left.png"/>			
+		<resource name="belt-front-right" fileName="belt-front-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/belt-front-right.png"/>			
+		<resource name="belt-back-right" fileName="belt-back-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/belt-back-right.png"/>		
+		<resource name="belt-back-left" fileName="belt-back-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/belt-back-left.png"/>		
+		<resource name="floor" fileName="floor.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/floor.png"/>	
+		<resource name="channel-v-top" fileName="channel-v-top.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/channel-v-top.png"/>
+		<resource name="channel-v-bottom" fileName="channel-v-bottom.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/channel-v-bottom.png"/>
+		<resource name="channel-v-center" fileName="channel-v-center.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/channel-v-center.png"/>
+		<resource name="channel-h-bottom" fileName="channel-h-bottom.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/channel-h-bottom.png"/>
+		<resource name="channel-h-top" fileName="channel-h-top.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/channel-h-top.png"/>
+		<resource name="channel-h-center" fileName="channel-h-center.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/channel-h-center.png"/>
+		<resource name="mt-front-left" fileName="mt-front-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/mt-front-left.png"/>			
+		<resource name="mt-front-right" fileName="mt-front-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/mt-front-right.png"/>			
+		<resource name="mt-back-right" fileName="mt-back-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/mt-back-right.png"/>		
+		<resource name="mt-back-left" fileName="mt-back-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/mt-back-left.png"/>		
+		<resource name="ma-front-left" fileName="ma-front-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/ma-front-left.png"/>			
+		<resource name="ma-front-right" fileName="ma-front-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/ma-front-right.png"/>			
+		<resource name="ma-back-right" fileName="ma-back-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/ma-back-right.png"/>		
+		<resource name="ma-back-left" fileName="ma-back-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/ma-back-left.png"/>		
+		<resource name="basket-right" fileName="basket-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/basket-right.png"/>		
+		<resource name="basket-left" fileName="basket-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/basket-left.png"/>		
+		<resource name="net-right" fileName="net-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/net-right.png"/>		
+		<resource name="net-left" fileName="net-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/monitor/net-left.png"/>
+	
+		<!-- 工厂 -->
+		<resource name="blank" fileName="blank.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/blank.png"/>
+		<resource name="grass" fileName="grass.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/grass.png"/>
+		<resource name="road-left" fileName="road-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/road-left.png"/>
+		<resource name="road-right" fileName="road-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/road-right.png"/>
+		<resource name="scraper-left" fileName="scraper-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/scraper-left.png"/>
+		<resource name="scraper-right" fileName="scraper-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/scraper-right.png"/>
+		<resource name="department-left" fileName="department-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/department-left.png"/>
+		<resource name="department-right" fileName="department-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/department-right.png"/>
+		<resource name="building-left" fileName="building-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/building-left.png"/>
+		<resource name="building-right" fileName="building-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/building-right.png"/>
+		<resource name="bench-left" fileName="bench-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/bench-left.png"/>
+		<resource name="bench-right" fileName="bench-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/bench-right.png"/>
+		<resource name="billboard-left" fileName="billboard-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/billboard-left.png"/>
+		<resource name="billboard-right" fileName="billboard-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/billboard-right.png"/>
+		<resource name="trash-left" fileName="trash-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/trash-left.png"/>
+		<resource name="trash-right" fileName="trash-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/trash-right.png"/>
+		<resource name="tree-small-left" fileName="tree-small-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/tree-small-left.png"/>
+		<resource name="tree-small-right" fileName="tree-small-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/tree-small-right.png"/>
+		<resource name="tree-big-left" fileName="tree-big-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/tree-big-left.png"/>
+		<resource name="tree-big-right" fileName="tree-big-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/tree-big-right.png"/>
+		<resource name="stone" fileName="stone.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/stone.png"/>
+		<resource name="signboard-small-left" fileName="signboard-small-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/signboard-small-left.png"/>
+		<resource name="signboard-small-right" fileName="signboard-small-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/signboard-small-right.png"/>
+		<resource name="ground-deep" fileName="ground-deep.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/ground-deep.png"/>
+		<resource name="ground-light" fileName="ground-light.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/ground-light.png"/>
+		<resource name="singlebuilding-left" fileName="singlebuilding-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/singlebuilding-left.png"/>
+		<resource name="singlebuilding-right" fileName="singlebuilding-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/singlebuilding-right.png"/>
+		
+		<resource name="signboard-big-lefta" fileName="signboard-big-lefta.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/signboard-big-lefta.png"/>
+		<resource name="signboard-big-leftb" fileName="signboard-big-leftb.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/signboard-big-leftb.png"/>
+		<resource name="signboard-big-righta" fileName="signboard-big-righta.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/signboard-big-righta.png"/>
+		<resource name="signboard-big-rightb" fileName="signboard-big-rightb.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/signboard-big-rightb.png"/>
+		<resource name="bus-bottom-left" fileName="bus-bottom-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/bus-bottom-left.png"/>
+		<resource name="bus-bottom-right" fileName="bus-bottom-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/bus-bottom-right.png"/>
+		<resource name="bus-top-left" fileName="bus-top-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/bus-top-left.png"/>
+		<resource name="bus-top-right" fileName="bus-top-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/bus-top-right.png"/>
+		<resource name="container-red-left" fileName="container-red-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/container-red-left.png"/>
+		<resource name="container-red-right" fileName="container-red-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/container-red-right.png"/>
+		<resource name="container-green-left" fileName="container-green-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/container-green-left.png"/>
+		<resource name="container-green-right" fileName="container-green-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/container-green-right.png"/>
+		<resource name="net-center-left" fileName="net-center-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/net-center-left.png"/>
+		<resource name="net-center-right" fileName="net-center-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/net-center-right.png"/>
+		<resource name="net-head-left" fileName="net-head-left.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/net-head-left.png"/>
+		<resource name="net-head-right" fileName="net-head-right.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/net-head-right.png"/>
+		<resource name="car" fileName="car.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/car.png"/>
+		<resource name="stones" fileName="stones.png" shared="true" type="image" uri="/module/fm/resource/images/node/factory/stones.png"/>
+	
+		<!-- 车间 -->
+		<resource name="floor" fileName="floor.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/floor.png"/>
+		<resource name="ground" fileName="ground.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/ground.png"/>
+		<resource name="ground-deep" fileName="ground-deep.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/ground-deep.png"/>
+		<resource name="gy_area" fileName="gy_area.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/gy_area.png"/>
+		<resource name="jh_area" fileName="jh_area.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/jh_area.png"/>
+		<resource name="office" fileName="office.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/office.png"/>
+		<resource name="sc_area" fileName="sc_area.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/sc_area.png"/>
+		<resource name="wl_area" fileName="wl_area.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/wl_area.png"/>
+		<resource name="xx_area" fileName="xx_area.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/xx_area.png"/>
+		<resource name="zj_area" fileName="zj_area.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/zj_area.png"/>
+		<resource name="zp_area" fileName="zp_area.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/zp_area.png"/>
+		<resource name="net1" fileName="net1.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/net1.png"/>
+		<resource name="net2" fileName="net2.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/net2.png"/>
+		<resource name="arrow" fileName="arrow.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/arrow.png"/>
+		<resource name="cement_floor" fileName="cement_floor.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/cement_floor.png"/>
+		<resource name="rubber_floor" fileName="rubber_floor.png" shared="true" type="image" uri="/module/fm/resource/images/node/workshop/rubber_floor.png"/>
+	</resources>
+</module>

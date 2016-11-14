@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<category name="rlzt" label="日历状态"  description="日历状态">
+	<field name="" value="10" label="工作日" parent="" state="valid"/>
+	<field name="" value="20" label="休息日" parent="" state="valid"/>
+</category>
+

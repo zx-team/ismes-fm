@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="gcrlmb" title="日历设置" onReady="testViewReady">
+	
+	<table name="table-gcrlmb" showrownum="true" scroll="false" minheight="430" editurl="" multiselect="false" url = "gcrlmbTable" 
+		showpager="false" pagesize = "200">
+		<column label="模版id" name="rlmbid" editable="false" key="true" hidden = "true"/>
+		<column label="模版名称" name="rlmbmc" editable="false" />
+		<column label="模版描述" name="rlmbms"  editable="false"/>
+		<column label="模版状态" name="rlmbzt"  editable="false" type="dict" dictionary="mbzt"/>
+		<column label="操作" name="action" editable="false" type="operation" width="100"> 
+			<attribute name="formatoptions"><![CDATA[
+				[
+					
+					{
+						name:"calendar_edit",
+						icon:"icon-calendar",
+						label:"日历设置",
+						click:handle_calendar
+					}
+				]
+			]]></attribute>
+		</column>
+	</table>
+	
+	<modal name="rlsz_modal" heading="日历设置" sizing="large" show="false" keyboard="false">
+		<modal-body>
+			<bunch name="eventContainer-ajax"></bunch>
+			<bunch layoutconstraint="md:8;">
+				<calendar name="calendar-gcrl" eventscontainer="eventContainer-ajax" 
+					editable="true" selectable="true" droppable="true"
+					fetchurl="/gcrl/getCalendarDays"
+					onSelect="onCalendarSelect"
+					dynamicparam="dyparam"
+					unselectauto="false"
+					>
+					<attribute name="events">
+						<![CDATA[
+							[
+								{
+									title: '工作日',
+									context:'default',
+									allDay: true
+									
+								},
+								{
+									title: '休息日',
+									context:'info',
+									allDay: false
+									
+								}
+							]
+						]]>
+					</attribute>
+				</calendar>
+			</bunch>
+			
+			<form name="rlsz_form"  horizontal="true" 
+				action="/gcrl/saveRlxx" method="post" layoutconstraint = "md:4;">
+				<form-body>
+					<form-group />
+					<form-group />
+					<form-group />
+					<form-group />
+					<form-group />
+					<form-group />
+					<form-group />
+					<form-group />
+					<form-group >
+						<hidden name="hidden_rlmbid"></hidden>
+						<label for="rlsz_zt" text="状态" layoutconstraint="md:3"/>
+						<select name="rlsz_zt" placeholder="请选择状态" dictionary="rlzt" validate="{required:true}"
+									  multiple="false" layoutconstraint="md:9" />
+					</form-group >	
+					<form-group >
+						<label for="rlsz_lx" text="类型" layoutconstraint="md:3"/>
+						<select name="rlsz_lx" placeholder="请选择类型" dictionary="rllx" validate="{required:true}"
+									  multiple="false" layoutconstraint="md:9" />
+					</form-group >	
+					<form-group >
+						<label for="rlsz_rl" text="日期" layoutconstraint="md:3"/>
+						<text name="rlsz_rl" readonly="true" layoutconstraint="md:9;" validate="{required:true}" />
+					</form-group>
+					<form-group >		
+						<label for="rlsz_ms" text="描述" layoutconstraint="md:3"/>
+						<textarea name="rlsz_ms" placeholder="日历描述" 
+							readonly="false" layoutconstraint="md:9;"  validate="{maxlength:100}"/>
+					</form-group>
+					<form-actions>
+						<button name="saveButton" label="保存" type="button" context="primary" onClick="saveBtnClick"/>
+					</form-actions>
+				</form-body>
+			</form>
+		</modal-body>
+	</modal>
+	
+	<attribute name="javascript">
+	<![CDATA[
+	    function dyparam(){
+	    	return {rlmbid:ui.hidden("hidden_rlmbid").val()};
+	    }
+		function testViewReady() {
+			
+		}
+		
+		function handle_calendar(name,rowid){
+			var data = ui.table("table-gcrlmb").getRow(rowid);
+			var rlmbid = data.rlmbid;
+			ui.hidden("hidden_rlmbid").val(rlmbid);
+		
+			ui.select("rlsz_zt").val("");
+			ui.select("rlsz_lx").val("");
+			ui.text("rlsz_rl").val("");
+			ui.textarea("rlsz_ms").val("");
+			
+			ui.modal("rlsz_modal").show();
+			ui.modal("rlsz_modal").bind("shown",function(){
+				ui.calendar("calendar-gcrl").today();
+				ui.calendar("calendar-gcrl").refetchEvents();
+			})
+		}
+		
+		function onCalendarSelect(start,end){
+			var startStr =  start.format("YYYY/MM/DD");
+			var start_s = start.format("YYYY-MM-DD");
+			var endStr = end.add(-1,'days').format("YYYY/MM/DD");
+			if(startStr == endStr){
+				ui.text("rlsz_rl").val(startStr);
+				var rlmbid = ui.hidden("hidden_rlmbid").val();
+				$.ajax({
+		             type: "POST",
+		             url:   ui.getRealUrl("calendarSelect"),
+		             async: false,
+		             data: {rlrq:start_s ,rlmbid:rlmbid },
+		             success: function(data){
+		             
+		             	if(data){
+			             	ui.select("rlsz_zt").val(data.rlztdm);
+			             	ui.select("rlsz_lx").val(data.rllxdm);
+							ui.textarea("rlsz_ms").val(data.rlms);
+		             	}else{
+		             		ui.select("rlsz_zt").val("");
+			             	ui.select("rlsz_lx").val("");
+							ui.textarea("rlsz_ms").val("");
+		             	}
+		             }
+		         });
+			}else{
+				ui.text("rlsz_rl").val(startStr + "-" + endStr);
+				
+				ui.select("rlsz_zt").val("");
+			    ui.select("rlsz_lx").val("");
+				ui.textarea("rlsz_ms").val("");
+			}
+	         
+		}
+		
+		function saveBtnClick(){
+			ui.form("rlsz_form").ajaxSubmit(function(){	
+				//ui.success("准备Ajax提交 ...");		
+				//btn.attr("disabled",true);
+			},function(data){
+				// data 返回保存的这些时间
+				// 当前是工作日还是休息日
+				var zt =  ui.select("rlsz_zt").val();
+				ui.success("保存成功！");
+				// 如果当前是  保存的时间是休息日  并且在当前时间事件中不存在，添加事件
+				// 如果当前 是 保存的时间是工作日  并且在当前时间时间中存在，删除事件
+				for(var d in data){
+					var thisDay = data[d];
+					var events = ui.calendar("calendar-gcrl").getClientEvents(function(event){
+						var start = event.start.format("YYYY/MM/DD") +'';
+						if(thisDay == start){
+							return true;
+						}else{
+							return false;
+						}
+					});
+					//休息日
+					if("20" == zt && events.length==0){
+						var reg=new RegExp("/","g");
+						thisDay = thisDay.replace(reg,"-");
+						var event ={"start":thisDay,"backgroundColor":"blue","rendering":"background"};
+						ui.calendar("calendar-gcrl").addEvent(event);
+					}
+					//工作日
+					if("10" == zt && events.length==1){
+						ui.calendar("calendar-gcrl").deleteEvent(events[0]);
+					}
+				}
+				
+			},function(){
+				ui.error("页面基本信息 保存失败！");
+			});
+		}
+	]]>
+	</attribute>
+</view>

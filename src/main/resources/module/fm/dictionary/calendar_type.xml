@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<category name="rllx" label="日历类型"  description="日历类型">
+	<field name="" value="10" label="公司级" parent="" state="valid"/>
+	<field name="" value="20" label="国家级" parent="" state="valid"/>
+</category>
+

@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="gswh" title="工时维护" onReady="testViewReady">
+	
+	<normal-actions>
+		<button name="newGsxxButton" label="添加"  type="button" icon="icon-Add_to" onClick="newBtnClick"/>
+	</normal-actions>
+	<table name="table-gswh" showrownum="false" scroll="false" minheight="430" editurl="" multiselect="false" url = "gswhTable" 
+		showpager="false" pagesize = "200" layoutconstraint="md:12;">
+		<column label="工厂工时模版id" name="gsmbid" editable="false" key="true" hidden = "true"/>
+		<column label="名称" name="gsmbmc" editable="false" />
+		<column label="描述" name="gsmbms"  editable="false"/>
+		<column label="默认模版" name="sfmrmb" type="dict" dictionary="sfmr" editable="false"/>
+		<column label="星期一(小时)" name="zhouyigs"  editable="false"/>
+		<column label="星期二(小时)" name="zhouergs"  editable="false"/>
+		<column label="星期三(小时)" name="zhousangs"  editable="false"/>
+		<column label="星期四(小时)" name="zhousigs"  editable="false"/>
+		<column label="星期五(小时)" name="zhouwugs"  editable="false"/>
+		<column label="星期六(小时)" name="zhouliugs"  editable="false"/>
+		<column label="星期日(小时)" name="zhourigs"  editable="false"/>
+		<column label="操作" name="action" editable="false" type="operation" width="100"> 
+		<attribute name="formatoptions"><![CDATA[
+			[
+				
+				{
+					name:"gcwh_edit",
+					icon:"icon-edit",
+					label:"编辑",
+					click:handle_gcwh_edit
+				},
+				{
+					name:"gcwh_delete",
+					icon:"icon-delete",
+					label:"删除",
+					click:handle_gcwh_delete
+				}
+			]
+		]]></attribute>
+		</column>
+	</table>
+	
+	<modal name="gswh_modal" heading="工时添加" sizing="huge" show="false" keyboard="true">
+		<modal-body>
+			<form name="gswh_form"  horizontal="true" action="/gswh/saveGswhxx" method="post">
+				<form-body>
+					<hidden name ="gswh_modal_gsmbid"></hidden>
+					<form-group layoutconstraint="md:12;">
+						<label for="gswh_modal_zjh" text="名称" layoutconstraint="md:1"/>
+						<text name="gswh_modal_zjh" placeholder="名称" 
+							validate="{required:true,maxlength:50}" layoutconstraint="md:2" />
+						
+						<label for="gswh_modal_ms" text="描述:" layoutconstraint="md:1"/>
+						<text name="gswh_modal_ms" placeholder="请填写描述" 
+							validate="{required:true,maxlength:200}" layoutconstraint="md:2" />
+							
+						<label for="gswh_modal_sfmrmb" text="是否默认:" layoutconstraint="md:2"/>
+						<select name="gswh_modal_sfmrmb"  dictionary="sfmr" value="20"
+									  multiple="false" validate="{required:true}" layoutconstraint="md:2" />
+					</form-group >	
+					
+					<bunch layoutconstraint="md:6">
+						<form-group layoutconstraint="md:12;">	
+							<label for="1" text="星期一" layoutconstraint="md:3;md-offset:3;"/>
+							<label for="2" text="星期二" layoutconstraint="md:3;"/>
+							<label for="3" text="星期三" layoutconstraint="md:3;"/>
+						</form-group>
+						<form-group layoutconstraint="md:12;">
+							<label for="text1" text="开始时间:" layoutconstraint="md:3;"/>
+							<date name="zhouyiks"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhouerks"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhousanks"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+						</form-group>
+						<form-group layoutconstraint="md:12;">
+							<label for="text2" text="结束时间:" layoutconstraint="md:3;"/>
+							<date name="zhouyijs"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhouerjs"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhousanjs"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+						</form-group>
+					</bunch>
+					
+					<bunch layoutconstraint="md:6">
+						<form-group layoutconstraint="md:12;">
+							<label for="4" text="星期四" layoutconstraint="md:3;"/>
+							<label for="5" text="星期五" layoutconstraint="md:3;"/>
+							<label for="6" text="星期六" layoutconstraint="md:3;"/>
+							<label for="7" text="星期日" layoutconstraint="md:3;"/>
+						</form-group>
+						<form-group layoutconstraint="md:12;">	
+							<date name="zhousiks"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhouwuks"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhouliuks"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhouriks"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+						</form-group>
+						
+						<form-group layoutconstraint="md:12;">	
+							<date name="zhousijs"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhouwujs"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhouliujs"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+							<date name="zhourijs"  format="HH:mm" readonly="false" layoutconstraint="md:3;" onBlur="time_change_func"/>
+						</form-group>
+					</bunch>
+				</form-body>
+			</form>
+			
+			<bunch layoutconstraint="md:11;md-offset:1;">
+			
+			<chartbar
+						name="bar"
+						showlegend="true"
+						showtooltip="true"
+						xaxistype="category"
+						yaxistype="value"
+						width="1070"
+						height="300"
+					>
+						<attribute name="xaxisdata">
+							<![CDATA[ 
+								['星期一','星期二','星期三','星期四','星期五','星期六','星期日']
+							]]>
+						</attribute>
+						<attribute name="color">
+							<![CDATA[ 
+								['blue']
+							]]>
+						</attribute>
+						
+					</chartbar>
+					</bunch>
+				<!-- <button name="refreshButton" label="刷新" type="button" context="primary" onClick="time_change_func"/> -->
+		</modal-body>
+		<modal-footer>
+						<button name="saveButton" label="保存" type="button" context="primary" onClick="saveBtnClick"/>
+		</modal-footer>
+	</modal>
+	
+	<attribute name="javascript">
+	<![CDATA[
+		var labelStyle = {
+                normal:{
+                    show:true,
+                    position:"top"
+                }
+		};
+		function testViewReady() {
+			
+		}
+		
+		function handle_gcwh_edit(name,rowid){
+			$.ajax({
+	             type: "GET",
+	             url:   ui.getRealUrl("initModalInfo"),
+	             async: false,
+	             data: {gsmbid : rowid },
+	             success: function(data){
+	             	var gsmbmc = data.gsmbmc;
+	             	ui.text("gswh_modal_zjh").val(gsmbmc);
+	             	var gsmbms = data.gsmbms;
+	             	ui.text("gswh_modal_ms").val(gsmbms);
+	             	var sfmrmb = data.sfmrmb;
+	             	ui.select("gswh_modal_sfmrmb").val(sfmrmb);
+	             	
+	             	var zhouyiks = data.zhouyiks;
+	             	ui.date("zhouyiks").val(timeFormat_func(zhouyiks,"HH:mm"));
+	             	var zhouerks = data.zhouerks;
+	             	ui.date("zhouerks").val(timeFormat_func(zhouerks,"HH:mm"));
+	             	var zhousanks = data.zhousanks;
+	             	ui.date("zhousanks").val(timeFormat_func(zhousanks,"HH:mm"));
+	             	var zhousiks = data.zhousiks;
+	             	ui.date("zhousiks").val(timeFormat_func(zhousiks,"HH:mm"));
+	             	var zhouwuks = data.zhouwuks;
+	             	ui.date("zhouwuks").val(timeFormat_func(zhouwuks,"HH:mm"));
+	             	var zhouliuks = data.zhouliuks;
+	             	ui.date("zhouliuks").val(timeFormat_func(zhouliuks,"HH:mm"));
+	             	var zhouriks = data.zhouriks;
+	             	ui.date("zhouriks").val(timeFormat_func(zhouriks,"HH:mm"));
+	             	var zhouyijs = data.zhouyijs;
+	             	ui.date("zhouyijs").val(timeFormat_func(zhouyijs,"HH:mm"));
+	             	var zhouerjs = data.zhouerjs;
+	             	ui.date("zhouerjs").val(timeFormat_func(zhouerjs,"HH:mm"));
+	             	var zhousanjs = data.zhousanjs;
+	             	ui.date("zhousanjs").val(timeFormat_func(zhousanjs,"HH:mm"));
+	             	var zhousijs = data.zhousijs;
+	             	ui.date("zhousijs").val(timeFormat_func(zhousijs,"HH:mm"));
+	             	var zhouwujs = data.zhouwujs;
+	             	ui.date("zhouwujs").val(timeFormat_func(zhouwujs,"HH:mm"));
+	             	var zhouliujs = data.zhouliujs;
+	             	ui.date("zhouliujs").val(timeFormat_func(zhouliujs,"HH:mm"));
+	             	var zhourijs = data.zhourijs;
+	             	ui.date("zhourijs").val(timeFormat_func(zhourijs,"HH:mm"));
+	             }
+	         });
+	        
+			ui.hidden("gswh_modal_gsmbid").val(rowid);
+			$("#myModalLabel")[0].innerHTML = "工时编辑";
+			time_change_func();
+			ui.modal("gswh_modal").show();
+		}
+		
+		function newBtnClick(){
+           	ui.text("gswh_modal_zjh").val("");
+           	ui.text("gswh_modal_ms").val("");
+           	ui.select("gswh_modal_sfmrmb").val("20");
+           	
+           	ui.date("zhouyiks").val("");
+           	ui.date("zhouerks").val("");
+           	ui.date("zhousanks").val("");
+           	ui.date("zhousiks").val("");
+           	ui.date("zhouwuks").val("");
+           	ui.date("zhouliuks").val("");
+           	ui.date("zhouriks").val("");
+           	ui.date("zhouyijs").val("");
+           	ui.date("zhouerjs").val("");
+           	ui.date("zhousanjs").val("");
+           	ui.date("zhousijs").val("");
+           	ui.date("zhouwujs").val("");
+           	ui.date("zhouliujs").val("");
+           	ui.date("zhourijs").val("");
+			$("#myModalLabel")[0].innerHTML = "工时添加";
+			time_change_func();
+			ui.modal("gswh_modal").show();
+		}
+		
+		function timeFormat_func(time,format){ 
+			if(time==null || time==''){
+				return '';
+			}
+			var t = new Date(time);
+			var tf = function(i){return (i < 10 ? "0" : "") + i};
+	       return format.replace(/yyyy|MM|dd|HH|mm|ss/g, function(a){
+	           switch(a){
+	               case "yyyy":
+	                   return tf(t.getFullYear());
+	                   break;
+	               case "MM":
+	                   return tf(t.getMonth() + 1);
+	                   break;
+	               case "mm":
+	                   return tf(t.getMinutes());
+	                   break;
+	               case "dd":
+	                   return tf(t.getDate());
+	                   break;
+	               case "HH":
+	                   return tf(t.getHours());
+	                   break;
+	               case "ss":
+	                   return tf(t.getSeconds());
+	                   break;
+	           }
+	      	})
+		}
+		
+		function saveBtnClick(){
+			ui.form("gswh_form").ajaxSubmit(function(){	
+				//ui.success("准备Ajax提交 ...");		
+				//btn.attr("disabled",true);
+			},function(data){
+				ui.modal("gswh_modal").hide();
+				ui.table("table-gswh").reload();
+				ui.success("保存成功！");
+			},function(){
+				ui.error("保存失败！");
+			});
+		}
+		
+		function handle_gcwh_delete(name,rowid){
+			var rowData = ui.table("table-gswh").getRow(rowid);
+			if(rowData.sfmrmb == '10'){
+				ui.warn("当前模版是默认模版，删除前请新增或者选择其他模版为默认模版！");
+				return;
+			}
+			ui.confirm("您确定要删除该条记录吗？", function(res){
+				if(res){
+					$.ajax({
+		             type: "POST",
+		             url:   ui.getRealUrl("deleteGswhxx"),
+		             async: false,
+		             data: {gsmbid : rowid },
+		             success: function(data){
+							ui.table("table-gswh").removeRow(rowid);
+			         }
+					});
+				}
+			});
+		}
+		
+		function time_change_func(){
+			
+			var dataArray = new Array();
+			var data = new Array();
+			
+			data[0] = time_minute(ui.date("zhouyiks").val(),ui.date("zhouyijs").val());
+			data[1] = time_minute(ui.date("zhouerks").val(),ui.date("zhouerjs").val());
+			data[2] = time_minute(ui.date("zhousanks").val(),ui.date("zhousanjs").val());
+			data[3] = time_minute(ui.date("zhousiks").val(),ui.date("zhousijs").val());
+			data[4] = time_minute(ui.date("zhouwuks").val(),ui.date("zhouwujs").val());
+			data[5] = time_minute(ui.date("zhouliuks").val(),ui.date("zhouliujs").val());
+			data[6] = time_minute(ui.date("zhouriks").val(),ui.date("zhourijs").val());
+			
+			if(parseInt(data[0]) < 0){
+				ui.error("周一的时间设置不合法！");
+				ui.button("saveButton").attr("disabled","disable");
+				return;
+			}
+			if(parseInt(data[1]) < 0){
+				ui.error("周二的时间设置不合法！");
+				ui.button("saveButton").attr("disabled","disable");
+				return;
+			}
+			if(parseInt(data[2]) < 0){
+				ui.error("周三的时间设置不合法！");
+				ui.button("saveButton").attr("disabled","disable");
+				return;
+			}
+			if(parseInt(data[3]) < 0){
+				ui.error("周四的时间设置不合法！");
+				ui.button("saveButton").attr("disabled","disable");
+				return;
+			}
+			if(parseInt(data[4]) < 0){
+				ui.error("周五的时间设置不合法！");
+				ui.button("saveButton").attr("disabled","disable");
+				return;
+			}
+			if(parseInt(data[5]) < 0){
+				ui.error("周六的时间设置不合法！");
+				ui.button("saveButton").attr("disabled","disable");
+				return;
+			}
+			if(parseInt(data[6]) < 0){
+				ui.error("周日的时间设置不合法！");
+				ui.button("saveButton").attr("disabled","disable");
+				return;
+			}
+			
+			ui.button("saveButton").attr("disabled",false);
+			
+			dataArray[0] = {"name":"工时","type":"bar", "label":labelStyle,"barWidth":'50%',"data":data}
+			ui.chartbar("bar").refreshData(dataArray);
+		}
+		
+		function time_minute(time1,time2){
+			if(!time1 || !time2){
+				return 0;
+			}
+			var time1_hour = time1.split(":")[0];
+			var time1_minite = time1.split(":")[1];
+			
+			var time1_int = parseInt(time1_hour)*60 + parseInt(time1_minite);
+			
+			var time2_hour = time2.split(":")[0];
+			var time2_minite = time2.split(":")[1];
+			
+			
+			var time2_int = parseInt(time2_hour)*60 + parseInt(time2_minite);
+			
+			if( parseInt(time1_hour) == 0 &&  parseInt(time1_minite) == 0 &&  parseInt(time2_hour) == 23
+				 &&  parseInt(time2_minite) == 59){
+				return 24.00; 
+			}
+			
+			var return_hours = (time2_int - time1_int)/60;
+			
+			return return_hours.toFixed(2)
+		}
+	]]>
+	</attribute>
+</view>

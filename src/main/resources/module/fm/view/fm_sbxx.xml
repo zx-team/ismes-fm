@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<view name="fm_sbxx" title="车间" onReady="ready">
+	<bag name="data">
+		<item name="nodes" type="json" bind="nodes"/>
+		<item name="toolBtns" type="json" bind="toolBtns"/>
+		<item name="data" type="json"	bind="data"/>
+	</bag>
+ 	<button name="saveBtn" label="保存"  type="button" context="primary" onClick="saveBtnClick" ></button>
+	<mega name="sbxxTb" height="600" toolbtns="true" editable="true" beforeItemMouseover="handleBeforeItemMouseover" beforeItemFocus="handleBeforeItemFocus"/>
+
+	<attribute name="javascript">
+	<![CDATA[	
+		var mega = ui.mega("sbxxTb");
+		function ready() {
+			mega.setNodes(ui.bag("data").get("nodes"));
+			mega.setToolBtns(ui.bag("data").get("toolBtns"));
+			mega.loadData(ui.bag("data").get("data"));
+			var i5Items = mega.findItems(function(id){
+				return this.getNodeType(id) == 'i5';
+			});
+			mega.popover(i5Items,{
+				content:function(id) {
+				    var _id = id+"_popover";
+				    var width = mega.getAttribute(id,"popover_width") || 150;
+				    var height = mega.getAttribute(id,"popover_height") || 100;
+					return "<div id='"+_id+"' style='width:"+width+"px;height:"+height+"px;overflow:hidden;'><div class='list-group'></div></div>";
+				},
+				trigger:"manual",
+				placement:function(id) {
+					console.log("placement : "+this.getAttribute(id,"placement"));
+					return this.getAttribute(id,"placement") || "auto";
+				}
+			});
+		}
+		var demoTimer;
+		var demoData = [{
+							title:"正在加工零件LJ-01 ...",
+							state:"normal",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						},
+						{
+							title:"正在加工零件PR-01 ...",
+							state:"normal",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						},
+						{
+							title:"机床主轴损坏 ...",
+							state:"error",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						},
+						{
+							title:"已完成零件LJ-01 10个",
+							state:"normal",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						},
+						{
+							title:"正在加订单D2016070910001 ...",
+							state:"normal",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						},
+						{
+							title:"物料不足！",
+							state:"warn",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						},
+						{
+							title:"已完成零件FU-01 7个！",
+							state:"normal",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						},
+						{
+							title:"加工程序加载失败！",
+							state:"error",
+							bizdata:"xxxx",
+							url:'http://www.baidu.com/k=1'
+						}];
+		
+		function startDemo() {
+			demoTimer = setInterval(function(){
+				var i5Items = mega.findItems(function(id){
+					return this.getNodeType(id) == 'i5';
+				});
+				var index = parseInt(Math.random()*(demoData.length)+1)-1;
+				var data = demoData[index];
+				if(data) {
+					index = parseInt(Math.random()*(i5Items.length)+1) -1;
+					data.id=i5Items[index];
+					handleData(data);
+				}
+			},1000);
+		}
+		function stopDemo() {
+			clearInterval(demoTimer);
+			demoTimer = null;
+		}
+		
+		function handleData(data) {
+			if(!data) return;
+			var _id = data.id;
+			if(!_id) return;		
+			if(!popoverState.all && !popoverState[_id] && !(popoverState.all ===false)) {			
+				mega.popover(_id,"show");
+				popoverState[_id] = true;
+			}
+			var frame = 0;
+			var suffix="info";
+			switch(data.state) {
+				case "normal":frame = 0;suffix="info";break;
+				case "warn":frame=1;suffix="warning";break;
+				case "error":frame=2;suffix="danger";break;
+			}
+			$("#"+_id+"_popover .list-group").append("<a target='_blank' class='list-group-item list-group-item-"+suffix+"' title='"+(data.description||data.title)+"' href='"+data.url+"'>"+data.title +"</a>");
+			var max = mega.getAttribute(_id,"popover-max") || 5;
+			if($("#"+_id+"_popover .list-group-item").length>max) {
+				$("#"+_id+"_popover .list-group-item:first").remove();
+			}
+			mega.setNodeFrame(_id,frame);
+		}
+		function handleBeforeItemMouseover(id) {
+			if(this.getNodeType(id) == 'floor') {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		function handleBeforeItemFocus(id) {
+			if(this.getNodeType(id) == 'floor') {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		var popoverState={};
+		function contextMenuBuilder(id,type) {
+			var result;
+			if(id && this.getNodeType(id) == "i5") {
+				var items = {
+		                    "show-state": {name: "显示设备状态",disabled:false},
+		                    "show-job": {name: "显示加工任务",disabled:function(){return false;}}
+		                };
+		        if(this.getNodeType(id) == "i5") {
+		        	items["sep"]="-";
+		        	items["togglePopover"]={name:(popoverState[id]===true || (!(id in popoverState) && popoverState.all))?"关闭提示":"显示提示"};
+		        	items["toggleStateDemo"]={name:i5StateDemoTimers[id]?"停止状态演示":"开始状态演示"};
+		        }
+				result = {
+					items:items,
+					callback:function(key) {
+						var _id = id;
+						switch(key) {
+							case "togglePopover":ui.mega("sbxxTb").popover(_id,(popoverState[_id]===true || (!(_id in popoverState) && popoverState.all))?"hide":"show");popoverState[_id]=!(popoverState[_id]===true || (!(_id in popoverState) && popoverState.all));break;
+							case "toggleStateDemo":!i5StateDemoTimers[_id]?startI5StateDemo(_id):stopI5StateDemo(_id);break;
+							default:ui.info("click context menu : "+key);
+						}
+					}
+				};
+			} else {//在空白处点击
+				result = {
+					items:{
+		                    "togglePopover": {name: popoverState.all?"关闭所有提示":"显示所有提示",disabled:false},
+		                    "toggleDemo" : {name:demoTimer?"停止模拟演示":"开始模拟演示"}
+		                },
+					callback:function(key) {
+						switch(key) {
+							case "togglePopover": {
+								ui.mega("sbxxTb").popover(popoverState.all?"hide":"show");
+								popoverState.all=!popoverState.all;
+								for(var key in popoverState) {
+									if(key == "all") continue;
+									delete popoverState[key];
+								}
+								
+								};break;
+							case "toggleDemo":!demoTimer?startDemo():stopDemo();break;
+							default:ui.info("click context menu : "+key);
+						}
+					}
+				};
+			}
+			return result;			 
+		}
+		function handleItemDbclick(id,type) {
+			ui.info("dbclcik : "+id+","+type);
+		}
+		function handleItemFocus(id,type) {
+			ui.info("focus : "+id+","+type);
+		}
+		function handleItemBlur(id,type) {
+			ui.info("blur : "+id+","+type);
+		}
+		var i5StateDemoTimers={};
+		function startI5StateDemo(id) {
+		    var _id = id;
+			i5StateDemoTimers[id]=setInterval(function(){
+				ui.mega("sbxxTb").setNodeFrame(_id,parseInt(Math.random()*2+1));
+			},1000);
+		}
+		function stopI5StateDemo(id) {
+			clearInterval(i5StateDemoTimers[id]);
+			delete i5StateDemoTimers[id];
+		}
+		
+		function saveBtnClick() {
+			$.ajax({
+		             type: "POST",
+		             url:  ui.getRealUrl("/sbxx/saveSbxx"),
+		             async: false,
+		             data: {e_data:  JSON.stringify(ui.mega("sbxxTb").exportData())},
+		             success: function(data){
+		             	ui.success("保存成功");
+		             },
+		             error: function(){
+		             	ui.success("保存失败");
+		             }
+		         });
+		}
+	]]>
+	</attribute>
+</view>

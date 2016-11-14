@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<category name="sfmr" label="是否默认"  description="是否默认">
+	<field name="" value="10" label="默认" parent="" state="valid"/>
+	<field name="" value="20" label="非默认" parent="" state="valid"/>
+</category>
